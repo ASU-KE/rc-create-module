@@ -46,14 +46,11 @@ def main():
     output = replace_templates(template, module_info)
 
     # Create the directory
-    #mod_path = Path('/packages/modulefiles/apps/')
-    #dir_path = mod_path(module_info.name)
     dir_path = os.path.join('/packages/modulefiles/apps', module_info.name)
     os.makedirs(dir_path, exist_ok=True)
     
     # Create the output file
     output_filename = os.path.join(dir_path, f"{module_info.version}.lua")
-    # output_filename = f"{module_info.name}_{module_info.version}.lua"
     with open(output_filename, "w") as output_file:
         output_file.write(output)
 
