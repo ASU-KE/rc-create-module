@@ -1,0 +1,75 @@
+-----------------------------------------------------------------------
+-- BLAME: {{admin}} <{{asurite}}@asu.edu>
+-- BUILD_DATE: {{date}}
+-- BUILD_PATH: /packages/apps/build/{{name}}/{{version}}
+-----------------------------------------------------------------------
+
+-- Define module metadata
+local app_path     = "/packages/apps/{{name}}/{{version}}"
+local _name        = "{{name}}"
+local _version     = "{{version}}"
+local _description = [===[
+
+  {{description}} 
+  
+  For more information, visit: {{url}}
+
+]===]
+
+local _help  = string.format([===[
+
+  Name: %s
+  Version:  %s
+  ## Description ## 
+  %s
+]===],
+  _name,
+  _version,
+  _description
+)
+
+whatis(_help)
+help(_help)
+
+-- Provide module dependencies if any
+-- load("dependency_module")
+
+-- Set program specific environment variables
+-- setenv("{{name}}_HOME", app_path)
+-- setenv("{{name}}_VERSION", _version)
+
+-- Set program specific path-dependent environment variables
+-- prepend_path("{{name}}_PATH", pathJoin(app_path, "toolbox"))
+
+-- Set generic path, library, and include environment variables
+prepend_path("PATH",            pathJoin(app_path, "bin"))
+prepend_path("LD_LIBRARY_PATH", pathJoin(app_path, "lib"))
+prepend_path("INCLUDE",         pathJoin(app_path, "include"))
+
+-- Set generic documentation environment variables
+-- prepend_path("MANPATH",    pathJoin(app_path, "man"    ))
+-- prepend_path("MANPATH",    pathJoin(app_path, "share/man"))
+-- prepend_path("INFOPATH",   pathJoin(app_path, "share/info"))
+
+-- Example source_sh
+-- source_sh("bash", "/packages/apps/{{name}}/{{version}}}/script.sh")
+
+-- Provide module-specific functions if any
+-- This is optional and can be removed if not required
+
+-- User message to stderr upon module load
+if (mode() == "load") then
+  -- if any logic is needed to run when a module is loaded put it here
+  -- logic code
+
+  local _loaded  = string.format([===[
+========================================================================
+Loaded: %s %s
+========================================================================
+    ]===], -- If you want to add info, do it below the `Loaded` line.
+    _name,
+    _version
+  )
+  LmodMessage(_loaded)
+
+end
