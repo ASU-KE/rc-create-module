@@ -3,7 +3,8 @@
 import os
 import pwd
 from datetime import datetime
-from pathlib import Path
+import subprocess
+#from pathlib import Path
 
 class ModuleInfo:
     def __init__(self):
@@ -12,11 +13,14 @@ class ModuleInfo:
         self.description = input("Enter module description: ").strip()
         self.url = input("Enter module URL: ").strip()
         self.asurite = os.getlogin()
+        if self.asurite == 'root':
+            # prompt for asurite
+            self.asurite = input("Please enter your ASURITE ID: ")
         user_info = pwd.getpwnam(self.asurite)
         full_name = user_info.pw_gecos.split(',')[0]
         self.admin = full_name.split()[1]
         self.date = datetime.today().strftime('%Y-%m-%d')
-
+        self.edit = input("Do you want to edit this file? [y/n]: ").strip().lower()
 
 def replace_templates(template, info):
     replacements = {
@@ -53,8 +57,11 @@ def main():
     output_filename = os.path.join(dir_path, f"{module_info.version}.lua")
     with open(output_filename, "w") as output_file:
         output_file.write(output)
-
-    print(f"Module file created successfully: {output_filename}")
-
+    
+    if ModuleInfo.edit == 'y':
+        ModuleInfo.edit = subprocess.run(["vim", output_file])
+    else:
+        print(f"Module file created successfully: {output_filename}")    
+    
 if __name__ == "__main__":
     main()
