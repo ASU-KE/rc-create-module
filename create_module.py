@@ -58,8 +58,8 @@ def main():
     with open(output_filename, "w") as output_file:
         output_file.write(output)
     
-    if ModuleInfo.edit == 'y':
-        ModuleInfo.edit = subprocess.run(["vim", output_file])
+    if module_info.edit == 'y':
+        module_info.edit = subprocess.run(["vim", output_file])
     else:
         print(f"Module file created successfully: {output_filename}")    
     
