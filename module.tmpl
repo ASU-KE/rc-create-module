@@ -13,7 +13,6 @@ local _description = [===[
   {{description}} 
   
   For more information, visit: {{url}}
-
 ]===]
 
 local _help  = string.format([===[
@@ -65,10 +64,12 @@ if (mode() == "load") then
   local _loaded  = string.format([===[
 ========================================================================
 Loaded: %s %s
+%s
 ========================================================================
     ]===], -- If you want to add info, do it below the `Loaded` line.
     _name,
-    _version
+    _version,
+	_description
   )
   LmodMessage(_loaded)
 
