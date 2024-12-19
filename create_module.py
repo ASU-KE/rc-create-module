@@ -7,15 +7,26 @@ import subprocess
 
 import textwrap
 
+# def format_text(text):
+#     wrapper = textwrap.TextWrapper(
+#         width=70,  # Target width
+#         expand_tabs=True,
+#         break_long_words=False,  # Don't break words
+#         break_on_hyphens=False,
+#         # width_slack=10  # Allows +/- 10 characters flexibility
+#     )
+#     return wrapper.fill(text)
+
 def format_text(text):
     wrapper = textwrap.TextWrapper(
-        width=70,  # Target width
+        width=70,
         expand_tabs=True,
-        break_long_words=False,  # Don't break words
-        break_on_hyphens=False,
-        width_slack=10  # Allows +/- 10 characters flexibility
+        break_long_words=False,
+        break_on_hyphens=False
     )
-    return wrapper.fill(text)
+    wrapped_lines = wrapper.wrap(text)
+    indented_text = '\n'.join('  ' + line for line in wrapped_lines)
+    return indented_text
 
 class ModuleInfo:
     def __init__(self):
