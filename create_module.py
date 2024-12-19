@@ -19,7 +19,7 @@ import textwrap
 
 def format_text(text):
     wrapper = textwrap.TextWrapper(
-        width=70,
+        width=78,
         expand_tabs=True,
         break_long_words=False,
         break_on_hyphens=False
