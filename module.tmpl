@@ -10,7 +10,7 @@ local _name        = "{{name}}"
 local _version     = "{{version}}"
 local _description = [===[
 
-  {{description}} 
+  {{description}}
   
   For more information, visit: {{url}}
 ]===]
@@ -69,7 +69,11 @@ Loaded: %s %s
     ]===], -- If you want to add info, do it below the `Loaded` line.
     _name,
     _version,
+<<<<<<< HEAD
 	_description
+=======
+    _description
+>>>>>>> 6faf715 (added description trim to 70 characters and updated module template with description as part of module load)
   )
   LmodMessage(_loaded)
 

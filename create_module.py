@@ -4,13 +4,52 @@ import os
 import pwd
 from datetime import datetime
 import subprocess
-#from pathlib import Path
+
+def format_text(input_text, width=70, tolerance=10):
+    lines = []
+    words = input_text.split()  # Split text into words
+    current_line = []
+    current_length = 0
+
+    for word in words:
+        word_length = len(word)
+        # Check if adding the word would exceed the tolerance
+        if current_length + word_length + len(current_line) <= width + tolerance:
+            current_line.append(word)
+            current_length += word_length
+        else:
+            # Check if the current line meets the lower tolerance limit
+            if current_length >= width - tolerance:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+                current_length = word_length
+            else:
+                # If not, try to adjust by appending the word to the current line
+                if current_length + word_length + len(current_line) <= width + tolerance:
+                    current_line.append(word)
+                    current_length += word_length
+                else:
+                    lines.append(" ".join(current_line))
+                    current_line = [word]
+                    current_length = word_length
+
+    # Add any remaining text as the last line
+    if current_line:
+        lines.append(" ".join(current_line))
+
+    return "\n".join(lines)
+
+# Example usage
+# input_text = "This is an example of a long string of text that we want to format such that no line exceeds 70 characters in width, with a tolerance of 10 characters, while not splitting any words in half."
+# formatted_text = format_text(input_text)
+# print(formatted_text)
 
 class ModuleInfo:
     def __init__(self):
         self.name = input("Enter module name: ").strip()
         self.version = input("Enter module version: ").strip()
-        self.description = input("Enter module description: ").strip()
+        self.desc = input("Enter module description: ").strip()
+        self.description = format_text(self.desc)
         self.url = input("Enter module URL: ").strip()
         self.asurite = os.getlogin()
         if self.asurite == 'root':
