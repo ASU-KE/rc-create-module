@@ -77,7 +77,7 @@ def main():
     module_info = ModuleInfo()
 
     # Read the template file
-    current-dir = os.getcwd()
+    current_dir = os.getcwd()
     file_path = os.path.join(current_dir, "module.tmpl")
     with open(file_path, "r") as template_file:
         template = template_file.read()
