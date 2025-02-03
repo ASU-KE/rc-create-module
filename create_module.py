@@ -39,6 +39,9 @@ class ModuleInfo:
         if self.asurite == 'root':
             # prompt for asurite
             self.asurite = input("Please enter your ASURITE ID: ")
+        if self.asurite == 'software':
+            # prompt for asurite
+            self.asurite = input("Please enter your ASURITE ID: ")
         user_info = pwd.getpwnam(self.asurite)
         full_name = user_info.pw_gecos.split(',')[0]
         self.admin = full_name.split()[1]
