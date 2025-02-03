@@ -77,7 +77,9 @@ def main():
     module_info = ModuleInfo()
 
     # Read the template file
-    with open("/packages/modulefiles/apps/template/module.tmpl", "r") as template_file:
+    current-dir = os.getcwd()
+    file_path = os.path.join(current_dir, "module.tmpl")
+    with open(file_path, "r") as template_file:
         template = template_file.read()
 
     # Replace templates
