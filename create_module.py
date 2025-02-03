@@ -44,12 +44,12 @@ class ModuleInfo:
 #            # prompt for asurite
 #            self.asurite = input("Please enter your ASURITE ID: ")
         try:
-            username = os.getlogin()  # May fail in some cases (e.g., cron jobs, SSH)
+            self.asurite = os.getlogin()  # May fail in some cases (e.g., cron jobs, SSH)
         except Exception:
-            username = getpass.getuser()  # Alternative method
+            self.asurite = getpass.getuser()  # Alternative method
         # Check if username is 'root' or 'software'
-        if username in ['root', 'software']:
-            username = input("Enter your asurite: ").strip()
+        if self.asurite in ['root', 'software']:
+            self.asurite = input("Enter your asurite: ").strip()
         user_info = pwd.getpwnam(self.asurite)
         full_name = user_info.pw_gecos.split(',')[0]
         self.admin = full_name.split()[1]
