@@ -35,13 +35,20 @@ class ModuleInfo:
         self.desc = input("Enter module description: ").strip()
         self.description = format_text(self.desc)
         self.url = input("Enter module URL: ").strip()
-        self.asurite = os.getlogin()
-        if self.asurite == 'root':
-            # prompt for asurite
-            self.asurite = input("Please enter your ASURITE ID: ")
-        if self.asurite == 'software':
-            # prompt for asurite
-            self.asurite = input("Please enter your ASURITE ID: ")
+#        self.asurite = os.getlogin()
+#        if self.asurite == 'root':
+#            # prompt for asurite
+#            self.asurite = input("Please enter your ASURITE ID: ")
+#        if self.asurite == 'software':
+#            # prompt for asurite
+#            self.asurite = input("Please enter your ASURITE ID: ")
+        try:
+            username = os.getlogin()  # May fail in some cases (e.g., cron jobs, SSH)
+        except Exception:
+            username = getpass.getuser()  # Alternative method
+        # Check if username is 'root' or 'software'
+        if username in ['root', 'software']:
+            username = input("Enter your asurite: ").strip()
         user_info = pwd.getpwnam(self.asurite)
         full_name = user_info.pw_gecos.split(',')[0]
         self.admin = full_name.split()[1]
