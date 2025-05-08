@@ -8,16 +8,6 @@ import subprocess
 
 import textwrap
 
-# def format_text(text):
-#     wrapper = textwrap.TextWrapper(
-#         width=70,  # Target width
-#         expand_tabs=True,
-#         break_long_words=False,  # Don't break words
-#         break_on_hyphens=False,
-#         # width_slack=10  # Allows +/- 10 characters flexibility
-#     )
-#     return wrapper.fill(text)
-
 def format_text(text):
     wrapper = textwrap.TextWrapper(
         width=78,
@@ -36,13 +26,7 @@ class ModuleInfo:
         self.desc = input("Enter module description: ").strip()
         self.description = format_text(self.desc)
         self.url = input("Enter module URL: ").strip()
-#        self.asurite = os.getlogin()
-#        if self.asurite == 'root':
-#            # prompt for asurite
-#            self.asurite = input("Please enter your ASURITE ID: ")
-#        if self.asurite == 'software':
-#            # prompt for asurite
-#            self.asurite = input("Please enter your ASURITE ID: ")
+        
         try:
             self.asurite = os.getlogin()  # May fail in some cases (e.g., cron jobs, SSH)
         except Exception:
