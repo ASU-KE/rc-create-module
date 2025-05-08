@@ -11,8 +11,8 @@ local _version     = "{{version}}"
 local _description = [===[
 
 {{description}}
-  
-  For more information, visit: 
+
+  For more information, visit:
   {{url}}
 ]===]
 
@@ -20,7 +20,7 @@ local _help  = string.format([===[
 
   Name: %s
   Version:  %s
-  ## Description ## 
+  ## Description ##
   %s
 ]===],
   _name,
@@ -44,7 +44,7 @@ help(_help)
 -- Set generic path, library, and include environment variables
 prepend_path("PATH",            pathJoin(app_path, "bin"))
 prepend_path("LD_LIBRARY_PATH", pathJoin(app_path, "lib"))
-prepend_path("INCLUDE",         pathJoin(app_path, "include"))
+prepend_path("CPATH",         pathJoin(app_path, "include"))
 
 -- Set generic documentation environment variables
 -- prepend_path("MANPATH",    pathJoin(app_path, "man"    ))
