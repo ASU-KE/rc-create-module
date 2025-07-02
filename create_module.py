@@ -97,13 +97,13 @@ def main():
         description="Create a Lua module file for a manually installed application.",
         formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument('--name', help="The name of the module.")
-    parser.add_argument('--version', help="The version of the module.")
-    parser.add_argument('--desc', help="A short, one-line description of the module.")
-    parser.add_argument('--url', help="A URL for the software's homepage.")
-    parser.add_argument('--asurite', help="The username of the module creator.")
+    parser.add_argument('-n', '--name', help="The name of the module.")
+    parser.add_argument('-v', '--version', help="The version of the module.")
+    parser.add_argument('-d', '--desc', help="A short, one-line description of the module.")
+    parser.add_argument('-u', '--url', help="A URL for the software's homepage.")
+    parser.add_argument('-a', '--asurite', help="The username of the module creator.")
     parser.add_argument(
-        '--output-dir',
+        '-o', '--output-dir',
         default=default_output_dir,
         help=f"The base directory to write the module file to. (Default: {default_output_dir})"
     )
@@ -113,7 +113,7 @@ def main():
         help=f"The email domain for the module creator. (Default: {default_domain})"
     )
     parser.add_argument(
-        '--edit',
+        '-e', '--edit',
         action='store_true',
         help="Immediately open the new module file in 'vim' after creation."
     )
@@ -166,7 +166,10 @@ def main():
     if args.edit:
         subprocess.run(["vim", output_filename])
     else:
-        print(f"Module file created successfully: {output_filename}")    
+        print(f"Module file created successfully: {output_filename}")
+        answer = input("Do you want to edit the module file now? (y/n) ").lower().strip()
+        if answer == 'y':
+            subprocess.run(["vim", output_filename])    
     
 if __name__ == "__main__":
     main()
