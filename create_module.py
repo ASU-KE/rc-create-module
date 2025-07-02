@@ -5,8 +5,10 @@ import pwd
 import getpass
 from datetime import datetime
 import subprocess
-
 import textwrap
+import argparse
+import sys
+import json
 
 def format_text(text):
     wrapper = textwrap.TextWrapper(
@@ -21,33 +23,52 @@ def format_text(text):
 
 class ModuleInfo:
     def __init__(self):
-        self.name = input("Enter module name: ").strip()
-        self.version = input("Enter module version: ").strip()
-        self.desc = input("Enter module description: ").strip()
-        self.description = format_text(self.desc)
-        self.url = input("Enter module URL: ").strip()
-        
-        try:
-            self.asurite = os.getlogin()  # May fail in some cases (e.g., cron jobs, SSH)
-        except Exception:
-            self.asurite = getpass.getuser()  # Alternative method
-        # Check if username is 'root' or 'software'
-        if self.asurite in ['root', 'software']:
-            self.asurite = input("Enter your asurite: ").strip()
-        user_info = pwd.getpwnam(self.asurite)
-        full_name = user_info.pw_gecos.split(',')[0]
-        self.admin = full_name.split()[1]
+        self.name = ""
+        self.version = ""
+        self.desc = ""
+        self.description = ""
+        self.url = ""
+        self.asurite = ""
+        self.admin = ""
         self.date = datetime.today().strftime('%Y-%m-%d')
-        self.edit = input("Do you want to edit this file? [y/n]: ").strip().lower()
 
-def replace_templates(template, info):
+def get_user_details(username=None):
+    """Gets username and full name, handling errors."""
+    if username:
+        asurite = username
+    else:
+        try:
+            asurite = os.getlogin()
+        except Exception:
+            asurite = getpass.getuser()
+
+    if asurite in ['root', 'software']:
+        asurite = input(f"Running as '{asurite}'. Please enter your personal username: ").strip()
+        if not asurite:
+            print("Error: Username cannot be empty.", file=sys.stderr)
+            sys.exit(1)
+
+    try:
+        user_info = pwd.getpwnam(asurite)
+        full_name = user_info.pw_gecos.split(',')[0]
+        admin = full_name.split()[1]
+        return asurite, admin
+    except KeyError:
+        print(f"Error: User '{asurite}' not found.", file=sys.stderr)
+        sys.exit(1)
+    except IndexError:
+        print(f"Warning: Could not determine full name for user '{asurite}'. Using username as admin.", file=sys.stderr)
+        return asurite, asurite
+
+
+def replace_templates(template, info, domain):
     replacements = {
         '{{name}}': info.name,
         '{{version}}': info.version,
         '{{description}}': info.description,
         '{{url}}': info.url,
         '{{admin}}': info.admin,
-        '{{asurite}}': info.asurite,
+        '{{asurite}}': f"{info.asurite}@{domain}",
         '{{date}}': info.date
     }
     
@@ -57,31 +78,96 @@ def replace_templates(template, info):
     return template
 
 def main():
-    # Get user input
+    # --- Configuration File Handling ---
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file_path = os.path.join(script_dir, 'config.json')
+    
+    try:
+        with open(config_file_path, 'r') as config_file:
+            config = json.load(config_file)
+        settings = config.get('Settings', {})
+        default_output_dir = settings.get('output_dir', '/packages/modulefiles/apps')
+        default_domain = settings.get('domain', 'asu.edu')
+    except (FileNotFoundError, json.JSONDecodeError):
+        default_output_dir = '/packages/modulefiles/apps'
+        default_domain = 'asu.edu'
+
+    # --- Argument Parsing ---
+    parser = argparse.ArgumentParser(
+        description="Create a Lua module file for a manually installed application.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('--name', help="The name of the module.")
+    parser.add_argument('--version', help="The version of the module.")
+    parser.add_argument('--desc', help="A short, one-line description of the module.")
+    parser.add_argument('--url', help="A URL for the software's homepage.")
+    parser.add_argument('--asurite', help="The username of the module creator.")
+    parser.add_argument(
+        '--output-dir',
+        default=default_output_dir,
+        help=f"The base directory to write the module file to. (Default: {default_output_dir})"
+    )
+    parser.add_argument(
+        '--domain',
+        default=default_domain,
+        help=f"The email domain for the module creator. (Default: {default_domain})"
+    )
+    parser.add_argument(
+        '--edit',
+        action='store_true',
+        help="Immediately open the new module file in 'vim' after creation."
+    )
+    args = parser.parse_args()
+
     module_info = ModuleInfo()
 
+    # Populate from args or interactive input
+    module_info.name = args.name or input("Enter module name: ").strip()
+    module_info.version = args.version or input("Enter module version: ").strip()
+    module_info.desc = args.desc or input("Enter module description: ").strip()
+    module_info.url = args.url or input("Enter module URL: ").strip()
+
+    if not all([module_info.name, module_info.version, module_info.desc]):
+        print("Error: Name, version, and description are required.", file=sys.stderr)
+        sys.exit(1)
+
+    module_info.description = format_text(module_info.desc)
+    module_info.asurite, module_info.admin = get_user_details(args.asurite)
+
     # Read the template file
-    current_dir = os.getcwd()
-    file_path = os.path.join(current_dir, "module.tmpl")
-    with open(file_path, "r") as template_file:
-        template = template_file.read()
+    try:
+        file_path = os.path.join(script_dir, "module.tmpl")
+        with open(file_path, "r") as template_file:
+            template = template_file.read()
+    except FileNotFoundError:
+        print(f"Error: Template file not found at '{file_path}'", file=sys.stderr)
+        sys.exit(1)
 
     # Replace templates
-    output = replace_templates(template, module_info)
+    output = replace_templates(template, module_info, args.domain)
 
     # Create the directory
-    dir_path = os.path.join('/packages/modulefiles/apps', module_info.name)
-    os.makedirs(dir_path, exist_ok=True)
+    try:
+        dir_path = os.path.join(args.output_dir, module_info.name)
+        os.makedirs(dir_path, exist_ok=True)
+    except OSError as e:
+        print(f"Error: Could not create directory '{dir_path}': {e}", file=sys.stderr)
+        sys.exit(1)
     
     # Create the output file
     output_filename = os.path.join(dir_path, f"{module_info.version}.lua")
-    with open(output_filename, "w") as output_file:
-        output_file.write(output)
+    try:
+        with open(output_filename, "w") as output_file:
+            output_file.write(output)
+    except IOError as e:
+        print(f"Error: Could not write to file '{output_filename}': {e}", file=sys.stderr)
+        sys.exit(1)
     
-    if module_info.edit == 'y':
-        module_info.edit = subprocess.run(["vim", output_filename])
+    if args.edit:
+        subprocess.run(["vim", output_filename])
     else:
         print(f"Module file created successfully: {output_filename}")    
     
 if __name__ == "__main__":
     main()
+
