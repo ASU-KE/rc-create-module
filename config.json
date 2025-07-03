@@ -2,7 +2,7 @@
   "Settings": {
     "output_dir": "/packages/modulefiles/apps",
     "domain": "asu.edu",
-    "module_template": "module.tmpl",
+    "module_template": "/Users/acchapm1/git/rc-create-module/module.tmpl",
     "editor": "vim",
     "privileged_users": [
       "root",
