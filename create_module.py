@@ -82,17 +82,16 @@ def replace_templates(template, info, domain):
 
 def main():
     # --- Configuration File Handling ---
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.dirname(os.path.realpath(__file__))
     config_file_path = os.path.join(script_dir, 'config.json')
-    
+
+    settings = {}
     try:
         with open(config_file_path, 'r') as config_file:
             config = json.load(config_file)
-        settings = config.get('Settings', {})
-        default_output_dir = settings.get('output_dir', '/packages/modulefiles/apps')
-        default_domain = settings.get('domain', 'asu.edu')
+            settings = config.get('Settings', {})
     except (FileNotFoundError, json.JSONDecodeError):
-        settings = {}
+        pass
 
     default_output_dir = settings.get('output_dir', '/packages/modulefiles/apps')
     default_domain = settings.get('domain', 'asu.edu')
@@ -144,7 +143,10 @@ def main():
 
     # Read the template file
     try:
-        file_path = os.path.join(script_dir, default_template)
+        if os.path.isabs(default_template):
+            file_path = default_template
+        else:
+            file_path = os.path.join(script_dir, default_template)
         with open(file_path, "r") as template_file:
             template = template_file.read()
     except FileNotFoundError:
