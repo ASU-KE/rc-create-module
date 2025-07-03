@@ -32,8 +32,11 @@ class ModuleInfo:
         self.admin = ""
         self.date = datetime.today().strftime('%Y-%m-%d')
 
-def get_user_details(username=None):
+def get_user_details(username=None, privileged_users=None):
     """Gets username and full name, handling errors."""
+    if privileged_users is None:
+        privileged_users = ['root', 'software']
+
     if username:
         asurite = username
     else:
@@ -42,7 +45,7 @@ def get_user_details(username=None):
         except Exception:
             asurite = getpass.getuser()
 
-    if asurite in ['root', 'software']:
+    if asurite in privileged_users:
         asurite = input(f"Running as '{asurite}'. Please enter your personal username: ").strip()
         if not asurite:
             print("Error: Username cannot be empty.", file=sys.stderr)
@@ -89,8 +92,13 @@ def main():
         default_output_dir = settings.get('output_dir', '/packages/modulefiles/apps')
         default_domain = settings.get('domain', 'asu.edu')
     except (FileNotFoundError, json.JSONDecodeError):
-        default_output_dir = '/packages/modulefiles/apps'
-        default_domain = 'asu.edu'
+        settings = {}
+
+    default_output_dir = settings.get('output_dir', '/packages/modulefiles/apps')
+    default_domain = settings.get('domain', 'asu.edu')
+    default_template = settings.get('module_template', 'module.tmpl')
+    default_editor = settings.get('editor', 'vim')
+    privileged_users = settings.get('privileged_users', ['root', 'software'])
 
     # --- Argument Parsing ---
     parser = argparse.ArgumentParser(
@@ -115,7 +123,7 @@ def main():
     parser.add_argument(
         '-e', '--edit',
         action='store_true',
-        help="Immediately open the new module file in 'vim' after creation."
+        help=f"Immediately open the new module file in '{default_editor}' after creation."
     )
     args = parser.parse_args()
 
@@ -132,11 +140,11 @@ def main():
         sys.exit(1)
 
     module_info.description = format_text(module_info.desc)
-    module_info.asurite, module_info.admin = get_user_details(args.asurite)
+    module_info.asurite, module_info.admin = get_user_details(args.asurite, privileged_users)
 
     # Read the template file
     try:
-        file_path = os.path.join(script_dir, "module.tmpl")
+        file_path = os.path.join(script_dir, default_template)
         with open(file_path, "r") as template_file:
             template = template_file.read()
     except FileNotFoundError:
@@ -164,12 +172,12 @@ def main():
         sys.exit(1)
     
     if args.edit:
-        subprocess.run(["vim", output_filename])
+        subprocess.run([default_editor, output_filename])
     else:
         print(f"Module file created successfully: {output_filename}")
-        answer = input("Do you want to edit the module file now? (y/n) ").lower().strip()
+        answer = input(f"Do you want to edit the module file with {default_editor} now? (y/n) ").lower().strip()
         if answer == 'y':
-            subprocess.run(["vim", output_filename])    
+            subprocess.run([default_editor, output_filename])    
     
 if __name__ == "__main__":
     main()

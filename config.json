@@ -1,6 +1,12 @@
 {
   "Settings": {
     "output_dir": "/packages/modulefiles/apps",
-    "domain": "asu.edu"
+    "domain": "asu.edu",
+    "module_template": "module.tmpl",
+    "editor": "vim",
+    "privileged_users": [
+      "root",
+      "software"
+    ]
   }
 }
